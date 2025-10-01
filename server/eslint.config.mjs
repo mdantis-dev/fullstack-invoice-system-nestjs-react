@@ -1,36 +1,51 @@
 // @ts-check
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
-import globals from "globals";
-import eslintConfigPrettier from "eslint-config-prettier";
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import globals from 'globals';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import { defineConfig } from 'eslint/config';
 
-export default tseslint.config(
-  // 1) Ignore build artifacts and the config file itself
-  { ignores: ["dist", "node_modules", "eslint.config.mjs"] },
+export default defineConfig([
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'eslint.config.mjs',
+      'jest.config.ts',
+      'prisma/**',
+    ],
+  },
 
-  // 2) Base JS + TypeScript (type-aware) configs
-  eslint.configs.recommended,
+  js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
 
-  // 3) Project-level settings and rule tweaks
   {
+    files: ['**/*.ts'],
     languageOptions: {
       globals: { ...globals.node },
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname, // uses server/tsconfig.json
+        project: ['./tsconfig.eslint.json'],
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
-      // your preferences
-      "@typescript-eslint/require-await": "off",
-      "@typescript-eslint/no-misused-promises": [
-        "error",
-        { checksVoidReturn: false },
-      ],
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
     },
   },
 
-  // 4) Turn off rules that conflict with Prettier (MUST be last)
+  {
+    files: ['src/**/*.spec.ts', 'test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+
   eslintConfigPrettier,
-);
+]);
