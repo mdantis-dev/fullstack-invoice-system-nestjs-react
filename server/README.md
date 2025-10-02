@@ -96,3 +96,229 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Altametrics – Backend (NestJS + Prisma + PostgreSQL)
+
+Small backend that authenticates users with JWT, lists invoices (with pagination), and returns invoice details. Clean structure, strict typing, and tests.
+
+## Stack
+
+- NestJS (TypeScript)
+- PostgreSQL (via Docker)
+- Prisma ORM (schema, migrations, seed)
+- Passport JWT (auth)
+- class-validator / class-transformer (DTO validation)
+- Jest + Supertest (unit + e2e tests)
+- ESLint (flat config) + Prettier
+
+## Features
+
+- `POST /auth/login` -> returns `accessToken` (JWT)
+- `GET /invoices` -> paginated list with `meta { page, limit, total, pages }`
+- `GET /invoices/:id` -> invoice detail (auth required)
+- DTO validation (login + pagination)
+- Seed script creates a demo user and sample invoices
+- Tests: service unit tests and full HTTP e2e test
+- Optional snippets: request logging middleware, Prisma exception filter, pagination DTO
+
+## Prerequisites
+
+- Node.js 18+
+- Docker Desktop (Postgres runs in Docker)
+
+## Environment
+
+Create `server/.env`:
+
+```env
+# Postgres (from docker-compose)
+DATABASE_URL=postgresql://app:app@localhost:5432/appdb
+
+# JWT
+JWT_SECRET=dev_change_me
+
+# App port (optional)
+PORT=3000 
+```
+
+## Quick Start
+
+~~~bash
+# from repo root
+docker compose up -d          # starts postgres:16
+
+cd server
+
+# generate Prisma client and apply schema
+npx prisma generate
+npx prisma migrate dev -n init
+
+# seed demo data (user + invoices)
+npm run prisma:seed
+
+# start dev server (http://localhost:3000)
+npm run start:dev
+~~~
+
+## Verify Quickly
+
+~~~bash
+# login
+$body = @{ email="demo@altametrics.test"; password="Passw0rd!" } | ConvertTo-Json
+$resp = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/auth/login" -ContentType "application/json" -Body $body
+$token = $resp.accessToken
+
+# list invoices
+Invoke-RestMethod -Uri "http://localhost:3000/invoices?page=1&limit=5" -Headers @{ Authorization = "Bearer $token" }
+
+# get one invoice
+Invoke-RestMethod -Uri "http://localhost:3000/invoices/1" -Headers @{ Authorization = "Bearer $token" }
+~~~
+
+## API
+Base URL: http://localhost:3000
+
+## Auth
+~~~bash
+POST /auth/login
+~~~
+
+Request body
+~~~json
+{ "email": "demo@altametrics.test", "password": "Passw0rd!" }
+~~~
+
+Response
+~~~json
+{ "accessToken": "<jwt>" }
+~~~
+
+Errors: `401 Unauthorized` on bad email/password. DTO validation errors return `400`.
+
+## Invoices
+
+Requires header: `Authorization: Bearer <token>`
+
+### GET /invoices
+
+Request
+~~~bash
+GET /invoices?page=1&limit=10
+# Headers:
+# Authorization: Bearer <token>
+~~~
+
+Response
+~~~json
+{
+  "data": [
+    {
+      "id": 1,
+      "vendor_name": "ACM Supplies",
+      "amount": 199.99,
+      "due_date": "2025-10-01T08:41:36.413Z",
+      "description": "Office chairs",
+      "paid": false,
+      "user_id": 1
+    }
+  ],
+  "meta": { "page": 1, "limit": 10, "total": 12, "pages": 2 }
+}
+~~~
+
+### GET /invoices/:id
+
+Request
+~~~bash
+GET /invoices/1
+# Headers:
+# Authorization: Bearer <token>
+~~~
+
+Response
+~~~json
+{
+  "id": 1,
+  "vendor_name": "ACM Supplies",
+  "amount": 199.99,
+  "due_date": "2025-10-01T08:41:36.413Z",
+  "description": "Office chairs",
+  "paid": false,
+  "user_id": 1
+}
+~~~
+
+Errors: `404 Not Found` if the invoice is missing or not owned by the current user.
+
+## Scripts
+~~~bash
+# Prisma
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+
+# Dev / build
+npm run start:dev
+npm run build
+npm run start:prod
+
+# Tests
+npm run test           # unit
+npm run test:watch
+npm run test:cov
+npm run test:e2e       # seeds auto-run via pretest:e2e
+
+# Lint / format
+npx eslint . --fix
+npx prettier --write .
+~~~
+
+## Project Structure
+
+~~~text
+server/
+  prisma/
+    schema.prisma
+    seed.ts
+  src/
+    auth/
+      auth.controller.ts
+      auth.module.ts
+      auth.service.ts
+      auth.service.spec.ts
+      jwt-auth.guard.ts
+      jwt.strategy.ts
+      jwt.types.ts
+    invoices/
+      invoices.controller.ts
+      invoices.module.ts
+      invoices.service.ts
+      invoices.service.spec.ts
+    prisma/
+      prisma.module.ts
+      prisma.service.ts
+    app.controller.ts
+    app.controller.spec.ts
+    app.module.ts
+    app.service.ts
+    main.ts
+  test/
+    app.e2e-spec.ts
+    jest-e2e.json
+  .env
+  jest.config.ts
+  eslint.config.mjs
+  tsconfig.json
+  tsconfig.build.json
+  tsconfig.eslint.json
+  tsconfig.spec.json
+  package.json
+~~~
+
+## Implementation Notes
+
+- Auth: JWT via Passport; token read from Authorization: Bearer <token>.
+- Validation: class-validator with global ValidationPipe (whitelist + forbidNonWhitelisted).
+- Pagination: page and limit query params; response includes meta.total and meta.pages.
+- Seeding: Prisma seed creates the demo user and multiple invoices.
+- Ownership: all invoice reads are scoped to the authenticated user.
+- CORS: default Nest CORS is fine for the local frontend.

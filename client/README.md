@@ -1,73 +1,130 @@
-# React + TypeScript + Vite
+# Altametrics – Frontend (Vite + React + TS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small frontend that authenticates, lists invoices with pagination, and shows invoice details in a modal. Keep it lean, keep it fast.
 
-Currently, two official plugins are available:
+## Demo Credentials
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Email: demo@altametrics.test  
+Password: Passw0rd!
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Vite + React + TypeScript
+- Redux Toolkit (auth/session)
+- Axios (with JWT interceptor)
+- TanStack React Query (data fetching/caching)
+- Zod (form validation)
+- Tailwind CSS v4 (styling)
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Login with Zod validation and clear auth errors
+- JWT stored in Redux + `localStorage` (auto-restore on refresh)
+- Protected routes (unauthenticated → `/login`)
+- Invoices page with:
+  - Server-side pagination (Prev/Next from API `meta`)
+  - Row click → modal with invoice details
+  - Loading, empty, and error states
+- Axios interceptor injects `Authorization: Bearer <token>`
+- Responsive layout (sticky topbar, table scroll for narrow screens)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js 18+ (LTS recommended)
+- Backend running at `http://localhost:3000`
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Environment
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Create `.env`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+~~~env
+VITE_API_URL=http://localhost:3000
+~~~
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Quick Start
+
+~~~bash
+# from repo root
+cd client
+
+# 1) install deps
+npm install
+
+# 2) env
+cp .env.example .env
+# ensure it contains:
+# VITE_API_URL=http://localhost:3000
+
+# 3) run dev
+npm run dev
+~~~
+
+Open http://localhost:5173 and log in with the demo credentials.
+
+## Scripts
+
+- `npm run dev` – start Vite dev server
+- `npm run build` – production build
+- `npm run preview` – preview the prod build
+- `npm run lint` – run ESLint
+
+## Project Structure
+
+~~~text
+client/
+  src/
+    api/
+      axios.ts                  # Axios instance + JWT interceptor
+    app/
+      store.ts                  # Redux store (auth slice) + persistence
+    features/
+      auth/
+        Login.tsx               # Zod form + loginSuccess dispatch
+        slice.ts                # token/user state, logout, selectors
+      invoices/
+        InvoiceModal.tsx        # invoice detail modal
+        InvoicesPage.tsx        # table, pagination, empty/error/loading
+        useInvoices.ts          # React Query hooks (list + detail)
+    pages/
+      BillsPage.tsx             # placeholder route
+      ExpensesPage.tsx          # placeholder route
+      HomePage.tsx              # post-login landing
+      ReportsPage.tsx           # placeholder route
+    routes/
+      ProtectedRoute.tsx        # route guard + shell layout
+    types/
+      index.ts                  # Invoice, Meta, and shared types
+    App.css                     # component styles (minimal)
+    App.tsx                     # route layout
+    index.css                   # Tailwind base/layers
+    main.tsx                    # React root, providers, Router
+    router.tsx                  # app routes (/login, /invoices, etc.)
+  .env.example                  # template with required vars
+  .gitignore
+  eslint.config.js              # flat config (ESLint) + Prettier rules
+  index.html                    # Vite entry HTML
+  package.json
+  package-lock.json
+  postcss.config.js             # Tailwind / PostCSS
+  README.md
+  tailwind.config.ts            # Tailwind v4 config
+  tsconfig.app.json             # TS config for app
+  tsconfig.json                 # base TS config
+  tsconfig.node.json            # TS config for tooling
+  vite.config.ts                # Vite config
+~~~
+
+## API
+
+The frontend expects these endpoints:
+
+- `POST /auth/login` → `{ accessToken }`
+- `GET /invoices?page=&limit=` → `{ data: Invoice[], meta }`
+- `GET /invoices/:id` → `Invoice`
+
+**Auth flow**
+
+1. `POST /auth/login` with `{ email, password }`.
+2. Save `accessToken` in Redux + `localStorage`.
+3. Axios interceptor adds `Authorization: Bearer <token>` to subsequent requests.
+4. On 401, logout and push to `/login`.
