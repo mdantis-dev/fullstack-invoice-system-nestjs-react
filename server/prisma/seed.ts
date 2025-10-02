@@ -34,7 +34,7 @@ async function main() {
     {
       vendor_name: "Stark Industries",
       amount: new Prisma.Decimal("3499.50"),
-      due_date: addDays(now, 14),
+      due_date: addDays(now, 8),
       description: "Dev workstations",
       paid: false,
       user_id: user.id,
@@ -42,7 +42,7 @@ async function main() {
     {
       vendor_name: "Wayne Logistics",
       amount: new Prisma.Decimal("799.00"),
-      due_date: addDays(now, 3),
+      due_date: addDays(now, 20),
       description: "Express shipping",
       paid: false,
       user_id: user.id,
@@ -58,7 +58,7 @@ async function main() {
     {
       vendor_name: "Umbrella Corp",
       amount: new Prisma.Decimal("128.00"),
-      due_date: addDays(now, 10),
+      due_date: addDays(now, 36),
       description: "Office cleaning",
       paid: false,
       user_id: user.id,
@@ -66,7 +66,7 @@ async function main() {
     {
       vendor_name: "Wonka Industries",
       amount: new Prisma.Decimal("560.40"),
-      due_date: addDays(now, 21),
+      due_date: addDays(now, 36),
       description: "Snack bar refill",
       paid: false,
       user_id: user.id,
@@ -74,7 +74,7 @@ async function main() {
     {
       vendor_name: "Cyberdyne Systems",
       amount: new Prisma.Decimal("22000"),
-      due_date: addDays(now, 60),
+      due_date: addDays(now, 43),
       description: "Server rack upgrade",
       paid: false,
       user_id: user.id,
@@ -82,7 +82,7 @@ async function main() {
     {
       vendor_name: "Soylent Foods",
       amount: new Prisma.Decimal("310.25"),
-      due_date: addDays(now, -2),
+      due_date: addDays(now, 52),
       description: "Team lunch (overdue)",
       paid: false,
       user_id: user.id,
@@ -90,7 +90,7 @@ async function main() {
     {
       vendor_name: "Tyrell Corp",
       amount: new Prisma.Decimal("9999.99"),
-      due_date: addDays(now, 45),
+      due_date: addDays(now, 56),
       description: "Workstation GPUs",
       paid: true,
       user_id: user.id,
@@ -98,7 +98,7 @@ async function main() {
     {
       vendor_name: "ACME Cloud",
       amount: new Prisma.Decimal("89.00"),
-      due_date: addDays(now, 5),
+      due_date: addDays(now, 58),
       description: "SaaS monthly",
       paid: true,
       user_id: user.id,
@@ -106,7 +106,7 @@ async function main() {
     {
       vendor_name: "Hooli",
       amount: new Prisma.Decimal("1530.00"),
-      due_date: addDays(now, 12),
+      due_date: addDays(now, 63),
       description: "Conference tickets",
       paid: false,
       user_id: user.id,

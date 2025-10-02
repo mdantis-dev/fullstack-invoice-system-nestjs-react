@@ -46,7 +46,7 @@ export default function Login() {
       const token = res.data?.accessToken
       if (!token) throw new Error('No token returned')
       dispatch(loginSuccess({ token, email }))
-      navigate('/invoices')
+      navigate('/home')
     } catch (err: unknown) {
       if (isAxiosError<ApiErrorBody>(err)) {
         setApiError(err.response?.data?.message ?? 'Authentication failed')

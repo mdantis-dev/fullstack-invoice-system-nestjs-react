@@ -9,6 +9,7 @@ import { logout } from '../features/auth/slice'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  timeout: 15000, // 15s
 })
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
