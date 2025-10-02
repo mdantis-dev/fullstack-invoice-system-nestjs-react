@@ -108,9 +108,9 @@ function Topbar() {
       <div className="topbar-inner">
         {/* Left: menu + title/breadcrumb */}
         <div className="flex items-center gap-3">
-          <button className="icon-btn" title="Menu" aria-label="Open menu">
-            <Menu className="h-5 w-5" />
-          </button>
+          <div className="h-9 w-9 grid place-items-center">
+            <Menu className="h-5 w-5 text-gray-600" aria-hidden="true" />
+          </div>
 
           {/* xs: short title */}
           <span className="sm:hidden text-sm font-medium text-gray-800">{current}</span>

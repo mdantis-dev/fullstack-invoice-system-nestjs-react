@@ -76,107 +76,94 @@ export default function InvoicesPage() {
         </div>
         {isFetching && <span className="text-xs text-gray-500">Refreshing…</span>}
       </div>
-
       <div className="table-surface">
-        {isLoading ? (
-          <div className="table-surface p-6 text-sm text-gray-500">Loading invoices…</div>
-        ) : isError ? (
-          <div className="table-surface p-6">
+        {isLoading && (
+          <div className="p-6 text-sm text-gray-500">Loading invoices…</div>
+        )}
+
+        {!isLoading && isError && (
+          <div className="p-6">
             <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               Failed to load invoices.
             </div>
             <button className="btn-secondary" onClick={() => refetch()}>Retry</button>
           </div>
-        ) : invoices.length === 0 ? (
-          <div className="table-surface p-6 text-sm text-gray-500">No invoices found.</div>
-        ) : (
-          <div className="table-surface">
-            <div className="overflow-x-auto">
-              <table className="min-w-[980px] md:min-w-full text-sm">
-                <thead className="table-head">
-                  <tr>
-                    <th className="table-th w-10">
+        )}
+
+        {!isLoading && !isError && invoices.length === 0 && (
+          <div className="p-6 text-sm text-gray-500">No invoices found.</div>
+        )}
+
+        {!isLoading && !isError && invoices.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-[980px] md:min-w-full text-sm">
+              <thead className="table-head">
+                <tr>
+                  <th className="table-th w-10">
+                    <input
+                      ref={headerCbRef}
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300"
+                      checked={allChecked}
+                      onChange={toggleAll}
+                    />
+                  </th>
+                  <th className="table-th">Date</th>
+                  <th className="table-th">Payee</th>
+                  <th className="table-th">Description</th>
+                  <th className="table-th">Due Date</th>
+                  <th className="table-th">Amount</th>
+                  <th className="table-th">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {invoices.map((inv) => (
+                  <tr key={inv.id} className="cursor-pointer hover:bg-gray-50" onClick={() => open(inv)}>
+                    <td className="table-td" onClick={(e) => e.stopPropagation()}>
                       <input
-                        ref={headerCbRef}
                         type="checkbox"
                         className="h-4 w-4 rounded border-gray-300"
-                        checked={allChecked}
-                        onChange={toggleAll}
+                        checked={selected.has(inv.id)}
+                        onChange={() => toggleOne(inv.id)}
                       />
-                    </th>
-                    <th className="table-th">Date</th>
-                    <th className="table-th">Payee</th>
-                    <th className="table-th">Description</th>
-                    <th className="table-th">Due Date</th>
-                    <th className="table-th">Amount</th>
-                    <th className="table-th">Status</th>
+                    </td>
+                    <td className="table-td" onClick={(e) => e.stopPropagation()}>{formatDate(inv.due_date)}</td>
+                    <td className="table-td">{inv.vendor_name}</td>
+                    <td className="table-td">{inv.description || '—'}</td>
+                    <td className="table-td">{formatLongDate(inv.due_date)}</td>
+                    <td className="table-td">{formatCurrency(inv.amount)}</td>
+                    <td className="table-td">
+                      {inv.paid ? (
+                        <span className="status status-green">Paid</span>
+                      ) : (
+                        <span className="status status-red">Open</span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {invoices.map((inv) => (
-                    <tr
-                      key={inv.id}
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => open(inv)}
-                    >
-                      <td className="table-td">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300"
-                          checked={selected.has(inv.id)}
-                          onChange={() => toggleOne(inv.id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </td>
-                      <td className="table-td" onClick={(e) => e.stopPropagation()}>{formatDate(inv.due_date)}</td>
-                      <td className="table-td">{inv.vendor_name}</td>
-                      <td className="table-td">{inv.description || '—'}</td>
-                      <td className="table-td">{formatLongDate(inv.due_date)}</td>
-                      <td className="table-td">{formatCurrency(inv.amount)}</td>
-                      <td className="table-td">
-                        {inv.paid ? (
-                          <span className="status status-green">Paid</span>
-                        ) : (
-                          <span className="status status-red">Open</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
-      {/* Pagination */}
       {meta && (
         <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-between">
           <p className="col-span-2 sm:col-span-1 text-sm text-gray-600">
             Page <span className="font-medium">{total === 0 ? 0 : meta.page}</span> of{' '}
             <span className="font-medium">{pages}</span> — {total} total
           </p>
-
           <div className="justify-self-start sm:justify-self-auto flex gap-2">
-            <button
-              className="btn-secondary"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={total === 0 || meta.page <= 1}
-            >
+            <button className="btn-secondary" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={total === 0 || meta.page <= 1 || isError}>
               Prev
             </button>
-            <button
-              className="btn-secondary"
-              onClick={() => setPage((p) => (pages > 0 ? Math.min(pages, p + 1) : p))}
-              disabled={total === 0 || (pages > 0 ? meta.page >= pages : true)}
-            >
+            <button className="btn-secondary" onClick={() => setPage((p) => (pages > 0 ? Math.min(pages, p + 1) : p))} disabled={total === 0 || (pages > 0 ? meta.page >= pages : true) || isError}>
               Next
             </button>
           </div>
         </div>
       )}
 
-      {/* Modal */}
       {selectedId !== null && <InvoiceModal id={selectedId} onClose={close} />}
     </div>
   )

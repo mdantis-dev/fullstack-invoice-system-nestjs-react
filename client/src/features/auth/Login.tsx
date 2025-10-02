@@ -18,8 +18,8 @@ export default function Login() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('demo@altametrics.test')
-  const [password, setPassword] = useState('Passw0rd!')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [apiError, setApiError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -94,12 +94,9 @@ export default function Login() {
             />
             {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
           </div>
-          <button type="submit" className="btn-primary w-full" disabled={pending}>
+          <button type="submit" className="btn-primary w-full mt-4" disabled={pending}>
             {pending ? 'Signing in…' : 'Sign in'}
           </button>
-          <p className="text-xs text-gray-500">
-            Seed user: <span className="font-mono">demo@altametrics.test / Passw0rd!</span>
-          </p>
         </form>
       </div>
     </div>
