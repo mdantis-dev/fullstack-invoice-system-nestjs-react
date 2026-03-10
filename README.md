@@ -1,4 +1,4 @@
-#Altametrics - Fullstack Invoice System – NestJS + React
+# Altametrics - Fullstack Invoice System – NestJS + React
 
 This repository contains a **full-stack technical assessment project** implemented as a monorepo.
 The goal of the assignment was to demonstrate the ability to design and implement a small production-style application using modern **TypeScript backend and frontend tooling**.
